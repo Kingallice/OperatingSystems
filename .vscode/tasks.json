@@ -1,0 +1,52 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "problemMatcher": [
+                "$tsc"
+            ],
+            "type": "shell",
+            "command": "gcc -o '${fileDirname}\\${fileBasenameNoExtension}' '${file}'",
+            "windows": {
+                "command": "gcc -o '${fileDirname}\\${fileBasenameNoExtension}.exe' '${file}'"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "nasm",
+            "type": "shell",
+            "command": "nasm",
+            "args": [
+                "-f elf",
+                "${relativeFile}",
+                "-o ${fileBasenameNoExtension}.o"
+            ]
+        },
+        {
+            "label": "gcc",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "-m32",
+                "-o ${fileBasenameNoExtension}",
+                "${fileBasenameNoExtension}.o",
+                "${cwd}/linux-ex/driver.c",
+                "${cwd}/linux-ex/asm_io.o"
+            ]
+        },
+        {
+            "label": "echo",
+            "type": "shell",
+            "command": "echo",
+            "args": [
+                "${relativeFileDirname}"
+            ]
+        }
+    ]
+}
