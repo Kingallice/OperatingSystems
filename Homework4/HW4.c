@@ -65,6 +65,9 @@ int main(int argc, char ** argv, char ** envp){
 	    //Print and Ready for inputs
     	printf("\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\nSUPER BASH $");
      	scanf("%[^\n]%*c", input); // reads input until a new line symbol, then the newline is discarded
+     	
+     	if(strcmp(input,"exit") == 0)
+     	    break;
     
         //Check for '|' and parse if found
         char ** pipedInputs = parse('|', input);
@@ -223,7 +226,7 @@ char * checkString(char ** parsedInput, char ** path, char * input){
 	for(i = 0; parsedInput[i] != NULL; i++){
 	    pointerCount++;
 	}
-	printf("String = %s\nNumber of pointers = %d\n", input, pointerCount);
+	printf("String = '%s'\nNumber of pointers = %d\n", input, pointerCount);
 	return command;
 }
 
@@ -238,13 +241,6 @@ void exec(char * pathToFile, char ** parsedInput){
 }
 
 void exec2(char * pathToFile1, char * pathToFile2, char ** parsedInput1, char ** parsedInput2){
-    int state;
-    if(fork() == 0){
-        execv(pathToFile1, parsedInput2);
-    }
-    else {
-        wait(&state);
-    }
 	/* 3.
 	     - Here, you will need to call execv, fork, wait, dup2, amd close
 		- You can begin by copying the code that you have for the exec function.
@@ -256,6 +252,39 @@ void exec2(char * pathToFile1, char * pathToFile2, char ** parsedInput1, char **
 		- I included an example of using a pipe under Files->Project Part 3 in Canvas which
 		   should be very helpful.
 	*/
+	int thePipe[2];
+	
+	pipe(thePipe);
+	
+	pid_t p1 = fork();
+	int state1, state2;
+	
+	if(p1 == 0) // Process 1
+	{
+		close(thePipe[0]); //Close read end of pipe
+		dup2(thePipe[1], STDOUT_FILENO);
+		close(thePipe[1]);
+
+        state1 = execv(pathToFile1, parsedInput1);
+        exit(1);
+	}
+	else //Parent Process
+	{
+		close(thePipe[1]);
+		
+	    pid_t p2 = fork();
+        if(p2 == 0){ //Process 2
+		    dup2(thePipe[0], STDIN_FILENO);
+		    close(thePipe[0]);
+		
+            state2 = execv(pathToFile2, parsedInput2);
+            exit(1);
+        }
+        close(thePipe[0]);
+        wait(&state1);
+        wait(&state2);
+	}
+	
 }
 
 void freeArray(char ** array){

@@ -44,6 +44,8 @@ int main(int argc, char ** argv, char ** envp){
     	printf("SUPER BASH $");
      	scanf("%[^\n]%*c", input); // reads input until a new line symbol, then the newline is discarded
     
+		if(strcmp(input, "exit") == 0)
+			break;
      /* 6.
     	- Call the checkString function to find the path to the file that you will need to execute
     	- Call the pointerPrint function on the parsedInput passed into the checkString function
@@ -185,7 +187,7 @@ char * checkString(char ** parsedInput, char ** path, char * input){
 	for(i = 0; parsedInput[i] != NULL; i++){
 	    pointerCount++;
 	}
-	printf("String = %s\nNumber of pointers = %d\n", input, pointerCount);
+	printf("String = '%s'\nNumber of pointers = %d\n", input, pointerCount);
 	return command;
 }
 
