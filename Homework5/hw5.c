@@ -71,6 +71,7 @@ void aquire(struct Memory, struct Process);
 void updateMemory(struct Memory);
 void release(struct Memory, struct Process);
 void resetEnd(int, struct Memory);
+void freeMemory(struct Memory);
 int isEmpty(struct Memory);
 
 ///////////////////////////////////////////////////////////////
@@ -122,6 +123,7 @@ int run(struct Memory m) {
     printMemory(m);
     printf("\n********************** ITERATION END *************************\n\n");
     empty = isEmpty(m);
+    break;
   } while (empty == 0);
   return 0;
 }
@@ -150,7 +152,7 @@ int run(struct Memory m) {
 struct Process makeProcess(int procNum) {
   struct Process newProcess;
   newProcess.procNum = procNum;
-  newProcess.size = rand()%MAXSIZE;
+  newProcess.size = 1+(rand()%MAXSIZE);
   newProcess.time = rand()%TIMESIZE;
 
   return newProcess;
@@ -276,7 +278,11 @@ void updateMemory(struct Memory m) {
 //          values, and returns the new MemoryArea structure.
 //
 struct MemoryArea makeMemoryArea(int start, int end) {
-  printf("Your Code Here.");
+  struct MemoryArea newMemoryArea;
+  newMemoryArea.start = start;
+  newMemoryArea.end = start;
+
+  return newMemoryArea;
 }
 
 // TASK:    makeBuffer() takes in an integer size and builds a list of
@@ -291,7 +297,17 @@ struct MemoryArea makeMemoryArea(int start, int end) {
 struct MemoryArea * makeBuffer(int size) {
   struct MemoryArea * buffer = malloc(size * sizeof(struct MemoryArea));
   
+  int i;
+  for(i = 0; i < size; i++){
+    if(i == 0){
+      buffer[i] = makeMemoryArea(0, size);
+    }
+    else {
+      buffer[i] = makeMemoryArea(-1,-1);
+    }
+  }
 
+  return buffer;
 }
 
 // TASK:    makeMemory will take in a size, declare a Memory structure called m
@@ -310,7 +326,11 @@ struct Memory makeMemory(int size) {
 //          each MemoryArea structures internally.
 //
 void freeMemory(struct Memory m) {
-
+  int i;
+  for(i = 0; i < m.size; i++){
+    free(&m.free[i].proc);
+    free(&m.free[i]);
+  }
 }
 
 // TASK:    printMemory() takes in a Memory structure mem, prints "BUFFER", a newline,
