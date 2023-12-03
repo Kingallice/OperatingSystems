@@ -123,7 +123,7 @@ int run(struct Memory m) {
     printMemory(m);
     printf("\n********************** ITERATION END *************************\n\n");
     empty = isEmpty(m);
-    break;
+    // break;
   } while (empty == 0);
   return 0;
 }
@@ -169,7 +169,7 @@ struct Process makeProcess(int procNum) {
 //          NOTE: ---> indicates a tab.
 //
 void printProcess(struct Process p) {
-  printf("Process:\n\tProcess Number: %d\n\tSize: %d\n\tTime: %d", p.procNum, p.size, p.time);
+  printf("Process:\n\tProcess Number: %d\n\tSize: %d\n\tTime: %d\n", p.procNum, p.size, p.time);
 }
 
 /////////////////////////////////////////////////////////////
@@ -188,8 +188,14 @@ void printProcess(struct Process p) {
 //          help discover if the Memory is empty.
 //
 int isEmpty(struct Memory m) {
-  printf("Your Code Here.");
-  return 0;
+  int i;
+  // for(i = 0; i < m.size; i++){
+
+  // }
+  int empty = 0;
+  if(m.size <= 0)
+    empty = 1;
+  return empty;
 }
 
 // TASK:    This one is difficult... So think carefully about what's going on.
@@ -210,7 +216,23 @@ int isEmpty(struct Memory m) {
 //          Else: printf("Not Enough Room! Releasing Memory.") with a newline.
 //
 void aquire(struct Memory m, struct Process p) {
-  printf("Your Code Here.");
+  int i;
+  for(i = 0; i < m.size; i++){
+    if(m.free[i].start == -1){
+      break;
+    }
+  }
+  i--;
+  if(m.free[i].end - m.free[i].start > p.size){
+    printf("Not Enough Room! Releasing Memory.\n");
+  }
+  else {
+    m.free[i].proc = p;
+    m.free[i].end = m.free[i].start = p.size;
+
+    m.free[i+1].start = m.free[i].end+1;
+    m.free[i+1].end = m.size;
+  }
 }
 
 // TASK:    This is another difficult one. Possibly the most difficult. So think
