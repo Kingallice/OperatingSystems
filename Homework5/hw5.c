@@ -123,7 +123,6 @@ int run(struct Memory m) {
     printMemory(m);
     printf("\n********************** ITERATION END *************************\n\n");
     empty = isEmpty(m);
-    // break;
   } while (empty == 0);
   return 0;
 }
@@ -217,20 +216,20 @@ int isEmpty(struct Memory m) {
 //
 void aquire(struct Memory m, struct Process p) {
   int i;
-  for(i = 0; i < m.size; i++){
+  for(i = 1; i < m.size; i++){
     if(m.free[i].start == -1){
       break;
     }
   }
   i--;
-  if(m.free[i].end - m.free[i].start > p.size){
+  if((m.free[i].end - m.free[i].start) < p.size){
     printf("Not Enough Room! Releasing Memory.\n");
   }
   else {
     m.free[i].proc = p;
-    m.free[i].end = m.free[i].start = p.size;
+    m.free[i].end = (m.free[i].start + p.size);
 
-    m.free[i+1].start = m.free[i].end+1;
+    m.free[i+1].start = (m.free[i].end+1);
     m.free[i+1].end = m.size;
   }
 }
@@ -292,7 +291,20 @@ void release(struct Memory m, struct Process p) {
 //          the time of the proc of the current MemoryArea by one.
 //
 void updateMemory(struct Memory m) {
-  printf("Your Code Here.");
+  int i;
+  for(i = 0; i < m.size; i++){
+    if(m.free[i].proc.procNum == 0){
+      continue;
+    }
+    else {
+      if(m.free[i].proc.time <= 0){
+        release(m, m.free[i].proc);
+      }
+      else {
+        m.free[i].proc.time--;
+      }
+    }
+  }
 }
 
 // TASK:    makeMemoryArea() takes in a start and end as integer, creates a new
@@ -302,7 +314,7 @@ void updateMemory(struct Memory m) {
 struct MemoryArea makeMemoryArea(int start, int end) {
   struct MemoryArea newMemoryArea;
   newMemoryArea.start = start;
-  newMemoryArea.end = start;
+  newMemoryArea.end = end;
 
   return newMemoryArea;
 }
@@ -377,5 +389,10 @@ void printMemory(struct Memory mem) {
 //          Again, ---> indicates a tab.
 //
 void printBuffer(struct MemoryArea * m, int size) {
-  printf("\tStart: %d\n\tEnd: %d\n\tSize: %d\n\tProc: %d\n\tTime: %d", m->start, m->end, m->proc.size, m->proc.procNum, m->proc.time);
+  int i;
+  for(i = 0; i < size; i++){
+    if(m[i].start != -1){
+      printf("\tStart:\t%d\n\tEnd:\t%d\n\tSize:\t%d\n\tProc:\t%d\n\tTime:\t%d\n\n", m[i].start, m[i].end, m[i].proc.size, m[i].proc.procNum, m[i].proc.time);  
+    }
+  }
 }
