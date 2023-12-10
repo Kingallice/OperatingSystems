@@ -276,7 +276,28 @@ void aquire(struct Memory m, struct Process p) {
 //          Read this description... a TON and understand what you are trying to do.
 //
 void release(struct Memory m, struct Process p) {
-  printf("Your Code Here.");
+  int i, p_idx, e_idx;
+  for(i = 0; i < m.size; i++){
+    if(m.free[i].proc.procNum == p.procNum){
+      p_idx = i;
+    }
+    else if(m.free[i].end == -1){
+      e_idx = i;
+      i = m.size;
+    }
+  }
+
+  for(i = p_idx; i < e_idx-1; i++){
+    m.free[i].proc.procNum = m.free[i+1].proc.procNum;
+    m.free[i].proc.size = m.free[i+1].proc.size;
+    m.free[i].proc.time = m.free[i+1].proc.time;
+
+    m.free[i].end = m.free[i].start+m.free[i].proc.size;
+    m.free[i+1].start = m.free[i].end+1;
+  }
+
+  m.free[e_idx].start = -1;
+  m.free[e_idx].end = -1;
 }
 
 // TASK:    updateMemory will take in a Memory structure m, iterate the contents
@@ -315,6 +336,9 @@ struct MemoryArea makeMemoryArea(int start, int end) {
   struct MemoryArea newMemoryArea;
   newMemoryArea.start = start;
   newMemoryArea.end = end;
+  newMemoryArea.proc.procNum = 0;
+  newMemoryArea.proc.size = 0;
+  newMemoryArea.proc.time = 0;
 
   return newMemoryArea;
 }
