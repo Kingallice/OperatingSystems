@@ -110,9 +110,11 @@ int main() {
 int run(struct Memory m) {
   int totalProcesses = 1;
   int empty = -1;
+  int i = 0;
   srand(time(NULL));
   do {
-    printf("\n*********************** ITERATION ***************************\n");
+    i++;
+    printf("\n*********************** ITERATION %d ***************************\n", i);
     updateMemory(m);
     if (totalProcesses < 15) {
       struct Process p = makeProcess(totalProcesses);
@@ -151,8 +153,8 @@ int run(struct Memory m) {
 struct Process makeProcess(int procNum) {
   struct Process newProcess;
   newProcess.procNum = procNum;
-  newProcess.size = 1+(rand()%MAXSIZE);
-  newProcess.time = rand()%TIMESIZE;
+  newProcess.size = 1+(rand()%(MAXSIZE-1));
+  newProcess.time = 3+(rand()%(TIMESIZE-3));
 
   return newProcess;
 }
@@ -187,12 +189,8 @@ void printProcess(struct Process p) {
 //          help discover if the Memory is empty.
 //
 int isEmpty(struct Memory m) {
-  int i;
-  // for(i = 0; i < m.size; i++){
-
-  // }
   int empty = 0;
-  if(m.size <= 0)
+  if(m.size <= 0 || m.free[1].start == -1)
     empty = 1;
   return empty;
 }
@@ -222,6 +220,7 @@ void aquire(struct Memory m, struct Process p) {
     }
   }
   i--;
+  
   if((m.free[i].end - m.free[i].start) < p.size){
     printf("Not Enough Room! Releasing Memory.\n");
   }
@@ -277,6 +276,7 @@ void aquire(struct Memory m, struct Process p) {
 //
 void release(struct Memory m, struct Process p) {
   int i, p_idx, e_idx;
+
   for(i = 0; i < m.size; i++){
     if(m.free[i].proc.procNum == p.procNum){
       p_idx = i;
@@ -287,6 +287,7 @@ void release(struct Memory m, struct Process p) {
     }
   }
 
+  //
   for(i = p_idx; i < e_idx-1; i++){
     m.free[i].proc.procNum = m.free[i+1].proc.procNum;
     m.free[i].proc.size = m.free[i+1].proc.size;
@@ -296,8 +297,9 @@ void release(struct Memory m, struct Process p) {
     m.free[i+1].start = m.free[i].end+1;
   }
 
-  m.free[e_idx].start = -1;
-  m.free[e_idx].end = -1;
+  m.free[e_idx-1].start = -1;
+  m.free[e_idx-2].end = m.free[e_idx-1].end;
+  m.free[e_idx-1].end = -1;
 }
 
 // TASK:    updateMemory will take in a Memory structure m, iterate the contents
@@ -384,11 +386,7 @@ struct Memory makeMemory(int size) {
 //          each MemoryArea structures internally.
 //
 void freeMemory(struct Memory m) {
-  int i;
-  for(i = 0; i < m.size; i++){
-    free(&m.free[i].proc);
-    free(&m.free[i]);
-  }
+  free(m.free);
 }
 
 // TASK:    printMemory() takes in a Memory structure mem, prints "BUFFER", a newline,
